@@ -7,7 +7,7 @@
 #include "irc.h"
 #include "handler.h"
 
-class Client : public IrcClient {
+class Client : public IrcClient, private MessageListener {
  public:
   Client(const char *serverAddress, uint16_t port, std::string userName, std::string realName, std::string nickName, const std::string& initialChannel);
   ~Client() override;
@@ -20,6 +20,7 @@ class Client : public IrcClient {
 
   [[nodiscard]] IrcHandler * getHandler() const;
   void setHandler(IrcHandler *handler);
+  void removeHandler();
 
   void shutdown();
 
@@ -47,7 +48,11 @@ class Client : public IrcClient {
 
   void joinRead();
 
- private:
+private:
+  bool onPingMessage(const IrcMessage &message) override;
+  bool onPrivMsgMessage(const IrcMessage &message) override;
+
+private:
   const char *serverAddress_;
   uint16_t port_;
   std::string userName_;

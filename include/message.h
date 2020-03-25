@@ -48,7 +48,7 @@ class IrcMessage {
     source_ = source;
   }
 
-  friend std::ostream& operator<<(std::ostream &out, IrcMessage &msg) {
+  friend std::ostream& operator<<(std::ostream &out, const IrcMessage &msg) {
     out << "Source: " << msg.source_ << "\n";
     out << "Command: " << msg.command_ << "\n";
     out << "Params: \n";

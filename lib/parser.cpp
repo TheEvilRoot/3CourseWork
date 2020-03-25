@@ -3,8 +3,6 @@
 IrcParser::IrcParser() = default;
 IrcParser::~IrcParser() = default;
 
-
-
 IrcMessage IrcParser::parseSingleMessage(const std::string &text) {
   IrcMessage message(text);
   std::string string = text;
@@ -52,7 +50,7 @@ std::vector<std::string> IrcParser::splitString(const std::string &source,
   ret.push_back(source.substr(prevPos, pos - prevPos));
   return ret;
 }
-©
+
 std::pair<std::string, std::experimental::optional<std::string>> IrcParser::getToken(const std::string &string) {
   auto split = splitString(string, ' ', 1);
   if (split.size() == 1)

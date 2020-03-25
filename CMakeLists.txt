@@ -27,7 +27,8 @@ set(INCLUDE_FILES
         include/buffer.h
         include/handler.h
         include/message.h
-        include/parser.h)
+        include/parser.h
+        include/listener.h)
 
 set(LIB_FILES
         lib/client.cpp

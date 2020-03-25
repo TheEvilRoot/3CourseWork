@@ -14,12 +14,14 @@ Client::Client(const char *serverAddress,
                std::string realName,
                std::string nickName,
                const std::string& initialChannel):
+               MessageListener({ }),
                serverAddress_ { serverAddress },
                port_ { port },
                userName_ {std::move( userName )},
                realName_ {std::move( realName )},
                nickName_ {std::move( nickName )},
-               socket_ { nullptr } { setChannel(initialChannel); }
+               socket_ { nullptr },
+               handler_ { nullptr } { setChannel(initialChannel); }
 
 Client::~Client() {
   delete socket_;
@@ -139,6 +141,13 @@ IrcHandler *Client::getHandler() const {
 
 void Client::setHandler(IrcHandler *handler) {
   handler_ = handler;
+  handler_->addListener(this);
+}
+
+void Client::removeHandler() {
+  if (handler_)
+    handler_->removeListener(this);
+  handler_ = nullptr;
 }
 
 void *Client::readHandler(void *clientPtr) {
@@ -159,4 +168,14 @@ void *Client::readHandler(void *clientPtr) {
 
   std::cout << "%%%\n";
   return client;
+}
+
+bool Client::onPingMessage(const IrcMessage &message) {
+  std::cout << "PONG!\n";
+  sendPong(message.getTrailing());
+  return true;
+}
+bool Client::onPrivMsgMessage(const IrcMessage &message) {
+  std::cout << ">> " << message.getSource() << ": " << message.getTrailing() << "\n";
+  return true;
 }

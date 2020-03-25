@@ -23,6 +23,7 @@ int main() {
     std::cout << ">> " << string << std::endl;
     client.sendIrc(string);
   }
+
   client.shutdown();
   return 0;
 }
