@@ -2,7 +2,7 @@
 
 ANSIrC 
 ------
-is a IRC client for Linux operating system writen on pure C using `sys/socket` socket API and `pthread` threading API.
+is a IRC client for Linux operating system writen on ~~pure C~~ C++ using `sys/socket` socket API and `pthread` threading API.
 
 [LICENSE](LICENSE)
 -------
