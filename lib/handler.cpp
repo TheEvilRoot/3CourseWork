@@ -2,7 +2,7 @@
 // Created by Прогрессивный Долгострой on 25.03.20.
 //
 
-#include "handler.h"
+#include "include/handler.h"
 
 #include <iostream>
 
@@ -10,7 +10,7 @@ IrcHandler::IrcHandler(IrcParser *parser): parser_ { parser } { }
 IrcHandler::~IrcHandler() = default;
 
 void IrcHandler::handleBaseMessage(IrcMessage &message) {
-  std::cout << message.getRaw();
+  std::cout << message << "\n";
 }
 
 void IrcHandler::pushMessage(std::string rawMessage) {
