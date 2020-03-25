@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-class IRCClient {
+class IrcClient {
  public:
-  IRCClient() = default;
-  virtual ~IRCClient() = default;
+  IrcClient() = default;
+  virtual ~IrcClient() = default;
 
   virtual void sendIrc(std::string command, std::vector<std::string> args, std::string comment) = 0;
 

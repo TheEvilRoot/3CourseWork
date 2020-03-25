@@ -66,21 +66,25 @@ Socket *Client::getSocket() const {
   return socket_;
 }
 
-void Client::sendIrc(std::string command, std::vector<std::string> args, std::string comment) {
+void Client::sendRaw(std::string rawIrc) {
   if (isConnected()) {
-    std::ostringstream commandStream;
-    commandStream << command << " ";
-
-    if (!args.empty()) {
-      for (const auto &arg : args)
-        commandStream << arg << " ";
-    }
-
-    if (!comment.empty())
-      commandStream << ":" << comment;
-
-    socket_->send(commandStream.str());
+    socket_->send(rawIrc);
   }
+}
+
+void Client::sendIrc(std::string command, std::vector<std::string> args, std::string comment) {
+  std::ostringstream commandStream;
+  commandStream << command << " ";
+
+  if (!args.empty()) {
+    for (const auto &arg : args)
+      commandStream << arg << " ";
+  }
+
+  if (!comment.empty())
+    commandStream << ":" << comment;
+
+  sendRaw(commandStream.str());
 }
 
 void Client::sendPong(std::string content) {
@@ -121,12 +125,20 @@ void Client::joinRead() {
 }
 
 void Client::sendCurrentChannelMessage(std::string message) {
-  sendChannelMessage(currentChannel_, message);
+  sendChannelMessage(currentChannel_, std::move(message));
 }
 
 void Client::shutdown() {
   sendIrc("QUIT", { }, "Goodby!");
   joinRead();
+}
+
+IrcHandler *Client::getHandler() const {
+  return handler_;
+}
+
+void Client::setHandler(IrcHandler *handler) {
+  handler_ = handler;
 }
 
 void *Client::readHandler(void *clientPtr) {
@@ -139,8 +151,8 @@ void *Client::readHandler(void *clientPtr) {
       Buffer& buffer = socket->getBuffer();
       while (!buffer.empty()) {
         auto data = buffer.pop();
-        std::cout << data << "%";
-        std::cout.flush();
+        if (client->handler_ != nullptr)
+          client->handler_->pushMessage(data);
       }
     }
   }

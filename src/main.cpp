@@ -6,12 +6,22 @@
 int main() {
   Client client("192.168.100.7",
       6667,
-      "ANCIrC",
-      "ANCIrC",
-      "ANCIrC",
+      "ANSIrC",
+      "ANSIrC",
+      "ANSIrC",
       "Hello");
+  auto parser = new IrcParser;
+  auto handler = new IrcHandler(parser);
+
+  client.setHandler(handler);
   client.connect();
-  client.sendCurrentChannelMessage("Hello from ANCIrC!");
+  while (client.isConnected()) {
+    std::string string;
+    std::getline(std::cin, string);
+    std::cout << ">> " << string << std::endl;
+    client.sendIrc(string);
+
+  }
   client.shutdown();
   return 0;
 }

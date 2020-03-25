@@ -5,8 +5,9 @@
 
 #include "socket.h"
 #include "irc.h"
+#include "handler.h"
 
-class Client : public IRCClient {
+class Client : public IrcClient {
  public:
   Client(const char *serverAddress, uint16_t port, std::string userName, std::string realName, std::string nickName, const std::string& initialChannel);
   ~Client() override;
@@ -17,7 +18,12 @@ class Client : public IRCClient {
   [[nodiscard]] bool isConnected() const;
   void connect();
 
+  [[nodiscard]] IrcHandler * getHandler() const;
+  void setHandler(IrcHandler *handler);
+
   void shutdown();
+
+  void sendRaw(std::string rawIrc);
 
   void sendIrc(std::string command, std::vector<std::string> args = { }, std::string comment = "") override;
 
@@ -51,6 +57,7 @@ class Client : public IRCClient {
 
   Socket *socket_;
   pthread_t readThread_;
+  IrcHandler *handler_;
 
   static void *readHandler(void *clientPtr);
 

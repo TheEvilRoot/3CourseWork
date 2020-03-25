@@ -93,6 +93,7 @@ ssize_t Socket::handleSendErrno(ssize_t err) {
   }
   return err;
 }
+
 ssize_t Socket::handleRecvErrno(ssize_t err) {
   if (err < 0) {
     perror("recv -1 bytes");

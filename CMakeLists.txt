@@ -17,7 +17,7 @@ set(CMAKE_PREFIX_PATH "${QT_LOC}/lib/cmake")
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/main.cpp src/socket.cpp src/socket.h src/buffer.cpp src/buffer.h src/client.cpp src/client.h src/irc.h)
+add_executable(${PROJECT_NAME} src/main.cpp src/main.cpp src/socket.cpp src/socket.h src/buffer.cpp src/buffer.h src/client.cpp src/client.h src/irc.h src/parser.cpp src/parser.h src/message.h src/handler.cpp src/handler.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt5::Widgets)
 
