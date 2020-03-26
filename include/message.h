@@ -7,6 +7,33 @@
 #include <utility>
 #include <ostream>
 
+struct MessageSource {
+  std::string nickName;
+  std::string userName;
+  std::string hostName;
+  
+  std::string getString() const {
+    return nickName + "!~" + userName + "@" + hostName;
+  }
+  
+  friend std::ostream& operator<<(std::ostream& out, const MessageSource &source) {
+    if (!source.nickName.empty()){
+      out << source.nickName;
+      return out;
+    }
+    if (!source.userName.empty()) {
+      out << source.userName;
+      return out;
+    }
+    if (!source.hostName.empty()) {
+      out << source.hostName;
+      return out;
+    }
+    out << "EmptySource";
+    return out;
+  }
+};
+
 class IrcMessage {
  public:
   explicit IrcMessage(std::string raw):
@@ -16,7 +43,7 @@ class IrcMessage {
     return raw_;
   }
 
-  [[nodiscard]] std::string getSource() const {
+  [[nodiscard]] MessageSource getSource() const {
     return source_;
   }
 
@@ -34,6 +61,8 @@ class IrcMessage {
 
   void setTrailing(const std::string &trailing) {
     trailing_ = trailing;
+    if (trailing_.back() != '\n')
+      trailing_ += '\n';
   }
 
   void setCommand(const std::string &command) {
@@ -44,7 +73,7 @@ class IrcMessage {
     params_.push_back(param);
   }
 
-  void setSource(const std::string& source) {
+  void setSource(MessageSource source) {
     source_ = source;
   }
 
@@ -54,13 +83,13 @@ class IrcMessage {
     out << "Params: \n";
     for (const auto & param : msg.params_)
       out << "\t" << param << "\n";
-    out << "Trailing: " << msg.trailing_ << "\n";
+    out << "Trailing: " << msg.trailing_;
     return out;
   }
 
  private:
   std::string raw_;
-  std::string source_;
+  MessageSource source_;
   std::vector<std::string> params_;
   std::string command_;
   std::string trailing_;

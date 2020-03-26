@@ -9,11 +9,11 @@ IrcMessage IrcParser::parseSingleMessage(const std::string &text) {
 
   if (string[0] == ':') {
     auto parts = splitString(string.substr(1), ' ', 1);
-    message.setSource(parts[0]);
+    message.setSource(parseSource(parts[0]));
     string = parts[1];
   }
 
-  auto tokens = getToken(string);
+  auto tokens = getToken(string, ' ');
   message.setCommand(tokens.first);
 
   while (tokens.second) {
@@ -22,7 +22,7 @@ IrcMessage IrcParser::parseSingleMessage(const std::string &text) {
       message.setTrailing(string.substr(1));
       break;
     } else {
-      tokens = getToken(string);
+      tokens = getToken(string, ' ');
       message.addParam(tokens.first);
     }
   }
@@ -30,7 +30,21 @@ IrcMessage IrcParser::parseSingleMessage(const std::string &text) {
   return message;
 }
 
-
+MessageSource IrcParser::parseSource(const std::string &source) {
+  auto parts = getToken(source, '!');
+  
+  if (!parts.second) {
+    return { source, "", "" };
+  }
+  
+  auto nick = parts.first;
+  parts = getToken(parts.second.value_or("").substr(1), '@');
+  if (!parts.second) {
+    return { nick, parts.first, "" };
+  }
+  
+  return { nick, parts.first, parts.second.value_or("") };
+}
 
 std::vector<std::string> IrcParser::splitString(const std::string &source,
                                                 char sep, int max) {
@@ -51,8 +65,8 @@ std::vector<std::string> IrcParser::splitString(const std::string &source,
   return ret;
 }
 
-std::pair<std::string, std::experimental::optional<std::string>> IrcParser::getToken(const std::string &string) {
-  auto split = splitString(string, ' ', 1);
+std::pair<std::string, std::experimental::optional<std::string>> IrcParser::getToken(const std::string &string, char sep) {
+  auto split = splitString(string, sep, 1);
   if (split.size() == 1)
     return std::make_pair(split[0], std::experimental::optional<std::string>());
   return std::make_pair(split[0], std::experimental::make_optional(split[1]));

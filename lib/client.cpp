@@ -20,6 +20,7 @@ Client::Client(const char *serverAddress,
                userName_ {std::move( userName )},
                realName_ {std::move( realName )},
                nickName_ {std::move( nickName )},
+               selfSource_ { nickName_, userName_, std::string(serverAddress_) },
                socket_ { nullptr },
                handler_ { nullptr } { setChannel(initialChannel); }
 
@@ -86,7 +87,16 @@ void Client::sendIrc(std::string command, std::vector<std::string> args, std::st
   if (!comment.empty())
     commandStream << ":" << comment;
 
-  sendRaw(commandStream.str());
+  std::string text = commandStream.str();
+  sendRaw(text);
+  
+  IrcMessage message(text);
+  message.setCommand(command);
+  message.setSource(selfSource_);
+  for (const auto & arg : args)
+    message.addParam(arg);
+  message.setTrailing(comment);
+  handler_->handleBaseMessage(message);
 }
 
 void Client::sendPong(std::string content) {
@@ -111,15 +121,15 @@ void Client::sendPrivateMessage(std::string receiver, std::string message) {
 }
 
 void Client::sendChannelMessage(std::string channel, std::string message) {
-  sendIrc("PRIVMSG", { "#" + channel }, message);
+  sendPrivateMessage("#" + channel, message);
 }
 
 void Client::sendJoin(std::string dist) {
-  sendIrc("JOIN", { dist });
+  sendIrc("JOIN", { dist }, dist);
 }
 
 void Client::sendJoinChannel(std::string channel) {
-  sendIrc("JOIN", { "#" + channel });
+  sendJoin("#" + channel);
 }
 
 void Client::joinRead() {
@@ -170,12 +180,23 @@ void *Client::readHandler(void *clientPtr) {
   return client;
 }
 
+bool Client::onBaseMessage(const IrcMessage &message) {
+  if (MessageListener::onBaseMessage(message))
+    return true;
+  std::cout << "(" << message.getCommand() << ") " << message.getTrailing();
+  return true;
+}
+
 bool Client::onPingMessage(const IrcMessage &message) {
-  std::cout << "PONG!\n";
   sendPong(message.getTrailing());
   return true;
 }
 bool Client::onPrivMsgMessage(const IrcMessage &message) {
-  std::cout << ">> " << message.getSource() << ": " << message.getTrailing() << "\n";
+  std::cout << ">> " << message.getSource() << ": " << message.getTrailing();
+  return true;
+}
+
+bool Client::onJoinMessage(const IrcMessage &message) {
+  std::cout << message.getSource() << " has joined channel " << message.getTrailing();
   return true;
 }

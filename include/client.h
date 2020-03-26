@@ -49,9 +49,11 @@ class Client : public IrcClient, private MessageListener {
   void joinRead();
 
 private:
+  bool onBaseMessage(const IrcMessage &message) override;
   bool onPingMessage(const IrcMessage &message) override;
   bool onPrivMsgMessage(const IrcMessage &message) override;
-
+  bool onJoinMessage(const IrcMessage &) override;
+  
 private:
   const char *serverAddress_;
   uint16_t port_;
@@ -59,6 +61,7 @@ private:
   std::string realName_;
   std::string nickName_;
   std::string currentChannel_;
+  MessageSource selfSource_;
 
   Socket *socket_;
   pthread_t readThread_;

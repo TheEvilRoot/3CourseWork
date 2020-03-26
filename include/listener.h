@@ -19,14 +19,41 @@ public:
       return onPingMessage(msg);
     if (cmd == "PRIVMSG")
       return onPrivMsgMessage(msg);
-
-    std::cout << msg << std::endl;
-
+    if (cmd == "JOIN")
+      return onJoinMessage(msg);
+    
+    if (cmd == "004")
+      return onMyInfoMessage(msg);
+    if (cmd == "005")
+      return onServerSupportFeaturesMessage(msg);
+    if (cmd == "042")
+      return onYourIdMessage(msg);
+    if (cmd == "254")
+      return onChannelsFormedMessage(msg);
+    if (cmd == "375")
+      return onMOTDStart(msg);
+    if (cmd == "372")
+      return onMOTDContent(msg);
+    if (cmd == "376")
+      return onMOTDEnds(msg);
+    if (cmd == "353")
+      return onNamesReplyMessage(msg);
+    
     return false;
   }
 
-  virtual bool onPingMessage(const IrcMessage &) = 0;
-  virtual bool onPrivMsgMessage(const IrcMessage &) = 0;
+  virtual bool onMyInfoMessage(const IrcMessage &) { return true; };
+  virtual bool onPingMessage(const IrcMessage &) { return true; };
+  virtual bool onPrivMsgMessage(const IrcMessage &) { return true; };
+  virtual bool onServerSupportFeaturesMessage(const IrcMessage &) { return true; }
+  virtual bool onYourIdMessage(const IrcMessage &) { return true; }
+  virtual bool onChannelsFormedMessage(const IrcMessage &) { return true; }
+  virtual bool onMOTDStart(const IrcMessage &) { return true; }
+  virtual bool onMOTDContent(const IrcMessage &) { return true; }
+  virtual bool onMOTDEnds(const IrcMessage &) { return true; }
+  virtual bool onJoinMessage(const IrcMessage &) { return true; }
+  virtual bool onNamesReplyMessage(const IrcMessage &) { return true; }
+
 
   bool shouldHandle(const std::string &messageType) const {
     return whitelist_.empty() || std::find(whitelist_.begin(), whitelist_.end(), messageType) != whitelist_.end();
