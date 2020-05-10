@@ -16,7 +16,7 @@ class Client : public IrcClient, private MessageListener {
   [[nodiscard]] std::string getChannel() const;
 
   [[nodiscard]] bool isConnected() const;
-  void connect();
+  bool connect();
 
   [[nodiscard]] IrcHandler * getHandler() const;
   void setHandler(IrcHandler *handler);
@@ -26,7 +26,7 @@ class Client : public IrcClient, private MessageListener {
 
   void sendRaw(std::string rawIrc);
 
-  void sendIrc(std::string command, std::vector<std::string> args = { }, std::string comment = "") override;
+  void sendIrc(std::string command, std::vector<std::string> args, std::string comment)override;
 
   void sendPong(std::string content) override;
 
@@ -54,7 +54,10 @@ private:
   bool onPrivMsgMessage(const IrcMessage &message) override;
   bool onJoinMessage(const IrcMessage &) override;
   
-private:
+  bool onMOTDStart(const IrcMessage &) override;
+  bool onMOTDContent(const IrcMessage &) override;
+  bool onMOTDEnds(const IrcMessage &) override;
+
   const char *serverAddress_;
   uint16_t port_;
   std::string userName_;
@@ -62,6 +65,7 @@ private:
   std::string nickName_;
   std::string currentChannel_;
   MessageSource selfSource_;
+  std::string motd_;
 
   Socket *socket_;
   pthread_t readThread_;

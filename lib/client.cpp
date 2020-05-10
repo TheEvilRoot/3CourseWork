@@ -49,9 +49,9 @@ void Client::setChannel(const std::string& channel) {
   }
 }
 
-void Client::connect() {
+bool Client::connect() {
   if (isConnected()) {
-    return;
+    return true;
   }
 
   socket_ = new Socket(serverAddress_, port_);
@@ -59,10 +59,13 @@ void Client::connect() {
     pthread_create(&readThread_, nullptr, &Client::readHandler, this);
   } else {
     perror("new Socket");
+    return false;
   }
 
   sendCredentials();
   setChannel(currentChannel_);
+
+  return true;
 }
 
 Socket *Client::getSocket() const {
@@ -100,7 +103,7 @@ void Client::sendIrc(std::string command, std::vector<std::string> args, std::st
 }
 
 void Client::sendPong(std::string content) {
-  sendIrc("PONG",  { content });
+  sendIrc("PONG",  { content }, "");
 }
 
 void Client::sendCredentials() {
@@ -109,7 +112,7 @@ void Client::sendCredentials() {
 }
 
 void Client::sendNick() {
-  sendIrc("NICK", { nickName_ });
+  sendIrc("NICK", { nickName_ }, "");
 }
 
 void Client::sendUser() {
@@ -198,5 +201,22 @@ bool Client::onPrivMsgMessage(const IrcMessage &message) {
 
 bool Client::onJoinMessage(const IrcMessage &message) {
   std::cout << message.getSource() << " has joined channel " << message.getTrailing();
+  return true;
+}
+
+bool Client::onMOTDStart(const IrcMessage &message) {
+  motd_.clear();
+  return true;
+}
+
+bool Client::onMOTDContent(const IrcMessage &message) {
+  motd_ += message.getTrailing();
+  return true;
+}
+
+bool Client::onMOTDEnds(const IrcMessage &) {
+  std::cout << "- Message of the Day\n";
+  std::cout << motd_;
+  std::cout << "- End of the Message of the Day\n";
   return true;
 }

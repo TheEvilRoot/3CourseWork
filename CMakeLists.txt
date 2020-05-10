@@ -28,14 +28,16 @@ set(INCLUDE_FILES
         include/handler.h
         include/message.h
         include/parser.h
-        include/listener.h)
+        include/listener.h
+        )
 
 set(LIB_FILES
         lib/client.cpp
         lib/socket.cpp
         lib/buffer.cpp
         lib/handler.cpp
-        lib/parser.cpp)
+        lib/parser.cpp
+        )
 
 set(SOURCE_FILES
         src/main.cpp)
