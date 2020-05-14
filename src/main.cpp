@@ -1,3 +1,5 @@
+#include <QApplication>
+
 #include <iostream>
 
 #include <unistd.h>
@@ -6,6 +8,8 @@
 
 #include "client.h"
 #include "socket.h"
+
+#include "ui/mainwindow.h"
 
 pthread_mutex_t serverReadyMutex;
 pthread_mutex_t bufferUpdatedMutex;
@@ -40,7 +44,7 @@ void *startServer(void *) {
   std::cout << "Waiting to client be ready..." << std::endl;
 
   Client client("127.0.0.1",
-      9997,
+      6667,
       "UserName",
       "RealName",
       "NickName",
@@ -81,15 +85,11 @@ void *startClient(void *) {
   return nullptr;
 }
 
-int main(const int argc, const char *argv[]) {
-  createMutex(serverReadyMutex, true);
-  createMutex(bufferUpdatedMutex, true);
-  createMutex(cmdBufferMutex);
+int main(int argc, char *argv[]) {
+  QApplication app(argc, argv);
+  MainWindow w;
 
-  pthread_t clientId;
+  w.show();
 
-  pthread_create(&clientId, nullptr, startClient, nullptr);
-  startServer(nullptr);
-
-  return 0;
+  return app.exec();
 }

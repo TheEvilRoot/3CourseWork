@@ -20,6 +20,9 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 link_directories(lib)
 include_directories(include)
 
+include_directories(include)
+link_directories(lib)
+
 set(INCLUDE_FILES
         include/client.h
         include/irc.h
@@ -29,7 +32,8 @@ set(INCLUDE_FILES
         include/message.h
         include/parser.h
         include/listener.h
-        )
+        include/ui/mainwindow.h
+        lib/ui/mainwindow.ui)
 
 set(LIB_FILES
         lib/client.cpp
@@ -37,7 +41,7 @@ set(LIB_FILES
         lib/buffer.cpp
         lib/handler.cpp
         lib/parser.cpp
-        )
+        lib/ui/mainwindow.cpp)
 
 set(SOURCE_FILES
         src/main.cpp)
