@@ -10,26 +10,43 @@ MainWindow::MainWindow(QWidget *parent):
   channelsModel{new QStringListModel} {
   ui->setupUi(this);
   init();
-  createClient();
+  updateStatus("Idle");
+  setConnected(false);
 }
 
-void MainWindow::createClient() {
-  client_ = new Client("127.0.0.1",
-                       6667,
-                       "S1lave",
-                       "S1lave",
-                       "Sl1ave",
+void MainWindow::createClient(const char *address, uint16_t port, const std::string &username, const std::string &realname, const std::string &nickname) {
+  if (client_ != nullptr && client_->isConnected() || clientAlive_) {
+    QMessageBox::critical(this, "Create client", "Unable to create new client while previous is working.\nWait for 'Idle' status and try again");
+    return;
+  }
+  delete client_;
+  client_ = new Client(address,
+                       port,
+                       username,
+                       realname,
+                       nickname,
                        "",
                        this);
   pthread_create(&clientThread_, nullptr, [](void *args) -> void* {
-    auto *client = static_cast<Client *>(args);
+    auto *self = static_cast<MainWindow *>(args);
+    auto client = self->client_;
+
+    self->clientAlive_ = true;
+    self->setConnected(true);
+
     auto *parser = new IrcParser;
     auto *handler = new IrcHandler(parser);
     client->setHandler(handler);
     client->connect();
     client->joinRead();
+
+    self->updateStatus("Idle");
+    self->clientAlive_ = false;
+    self->enableControls();
+    self->setConnected(false);
+
     return nullptr;
-  }, client_);
+  }, this);
 }
 
 void MainWindow::init() {
@@ -51,10 +68,6 @@ void MainWindow::init() {
     if (!client_->getChannel().empty()) {
       client_->leaveChannel();
     }
-  });
-
-  connect(ui->bDisconnect, &QPushButton::clicked, this, [&]() {
-    client_->shutdown();
   });
 }
 
@@ -168,4 +181,27 @@ void MainWindow::setControlsState(bool state) {
     ui->lwUsers->setDisabled(!state);
     ui->lwChannels->setDisabled(!state);
   });
+}
+
+void MainWindow::setConnected(bool cn) {
+  QMetaObject::invokeMethod(this, [this, cn]() {
+    if (!cn) {
+      ui->bDisconnect->setText("New connection");
+      disconnect(ui->bDisconnect, &QPushButton::clicked, this, &MainWindow::onDisconnectClicked);
+      connect(ui->bDisconnect, &QPushButton::clicked, this, &MainWindow::onConnectClicked);
+    } else {
+      ui->bDisconnect->setText("Disconnect");
+      disconnect(ui->bDisconnect, &QPushButton::clicked, this, &MainWindow::onConnectClicked);
+      connect(ui->bDisconnect, &QPushButton::clicked, this, &MainWindow::onDisconnectClicked);
+    }
+  });
+}
+
+void MainWindow::onDisconnectClicked() {
+  client_->shutdown();
+  disableControls();
+}
+
+void MainWindow::onConnectClicked() {
+  createClient("127.0.0.1", 6667, "S1ave", "S1ave", "S1ave");
 }

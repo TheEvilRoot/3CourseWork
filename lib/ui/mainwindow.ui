@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>484</width>
-    <height>275</height>
+    <height>289</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="5" column="5">
+    <item row="5" column="7">
      <widget class="QPushButton" name="bSend">
       <property name="text">
        <string>Send</string>
@@ -26,37 +26,24 @@
      </widget>
     </item>
     <item row="5" column="1">
-     <widget class="QPushButton" name="bDisconnect">
-      <property name="text">
-       <string>Disconnect</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
      <widget class="QPushButton" name="bLeave">
       <property name="text">
        <string>Leave channel</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="0" colspan="2">
-     <widget class="QListView" name="lwUsers"/>
-    </item>
-    <item row="0" column="0" colspan="2">
-     <widget class="QLabel" name="lStatus">
+    <item row="5" column="0">
+     <widget class="QPushButton" name="bDisconnect">
       <property name="text">
-       <string>Status:</string>
+       <string>Disconnect</string>
       </property>
      </widget>
     </item>
+    <item row="4" column="0" colspan="2">
+     <widget class="QListView" name="lwUsers"/>
+    </item>
     <item row="2" column="0" colspan="2">
      <widget class="QListView" name="lwChannels"/>
-    </item>
-    <item row="0" column="2" rowspan="5" colspan="4">
-     <widget class="QListView" name="lwLog"/>
-    </item>
-    <item row="5" column="2" colspan="3">
-     <widget class="QLineEdit" name="leMessage"/>
     </item>
     <item row="3" column="0" colspan="2">
      <widget class="QLabel" name="label_2">
@@ -71,6 +58,19 @@
        <string>Channels:</string>
       </property>
      </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="QLabel" name="lStatus">
+      <property name="text">
+       <string>Status:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2" rowspan="5" colspan="6">
+     <widget class="QListView" name="lwLog"/>
+    </item>
+    <item row="5" column="2" colspan="5">
+     <widget class="QLineEdit" name="leMessage"/>
     </item>
    </layout>
   </widget>

@@ -6,6 +6,7 @@
 #include <QStringListModel>
 #include <QString>
 #include <QStringList>
+#include <QMessageBox>
 
 #include "ui/clientview.h"
 
@@ -52,10 +53,12 @@ public:
   void updateChannels();
 
   void setControlsState(bool);
+  void setConnected(bool);
 
-  void asyncUserAction(const std::function<void(ClientView *)> &function);
+  void onConnectClicked();
+  void onDisconnectClicked();
 
-  void createClient();
+  void createClient(const char *address, uint16_t port, const std::string &username, const std::string &realname, const std::string &nickname);
   void init();
 
   Ui::MainWindow *ui;
@@ -70,6 +73,7 @@ public:
 
   Client *client_;
   pthread_t clientThread_;
+  bool clientAlive_;
 
   QString motd_;
 };
