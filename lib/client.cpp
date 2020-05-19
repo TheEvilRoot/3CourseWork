@@ -64,7 +64,7 @@ bool Client::connect() {
     pthread_create(&readThread_, nullptr, &Client::readHandler, this);
   } else {
     perror("new Socket");
-    view_->onConnectionFailure("socker failed");
+    view_->onConnectionFailure("Socket connection failed");
     return false;
   }
 
@@ -205,7 +205,11 @@ void *Client::readHandler(void *clientPtr) {
 
 bool Client::onBaseMessage(const IrcMessage &msg) {
   std::cerr << msg << std::endl;
-  return MessageListener::onBaseMessage(msg);
+  if (!MessageListener::onBaseMessage(msg)) {
+    view_->onUnknownMessage(msg.getRaw());
+    return true;
+  }
+  return true;
 }
 
 bool Client::onPingMessage(const IrcMessage &message) {

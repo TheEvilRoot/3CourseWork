@@ -41,6 +41,7 @@ public:
   void onServerChannelsUpdated(const std::vector<std::string>& channels) override;
 
   void onErrorMessage(std::string message) override;
+  void onUnknownMessage(std::string message) override;
 
   void enableControls() override;
 

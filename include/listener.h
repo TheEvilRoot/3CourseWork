@@ -42,7 +42,9 @@ public:
       return onExpectedError(msg);
     if (cmd == "404")
       return onExternalMessage(msg);
-    
+    if (cmd == "366")
+      return true;
+
     return false;
   }
 

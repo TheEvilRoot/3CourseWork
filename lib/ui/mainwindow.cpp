@@ -8,7 +8,8 @@ MainWindow::MainWindow(QWidget *parent):
   logModel{new QStringListModel},
   usersModel{new QStringListModel},
   channelsModel{new QStringListModel},
-  client_{nullptr}{
+  client_{nullptr},
+  clientAlive_{false} {
   ui->setupUi(this);
   init();
   updateStatus("Idle");
@@ -36,10 +37,17 @@ void MainWindow::createClient(std::string address, uint16_t port, std::string us
     self->clientAlive_ = true;
     self->setConnected(true);
 
+    self->updateStatus("Connecting...");
+    self->disableControls();
+
     auto *parser = new IrcParser;
     auto *handler = new IrcHandler(parser);
     client->setHandler(handler);
     client->connect();
+
+    self->updateStatus("Connected");
+    self->enableControls();
+
     client->joinRead();
 
     self->updateStatus("Idle");
@@ -53,22 +61,26 @@ void MainWindow::createClient(std::string address, uint16_t port, std::string us
 
 void MainWindow::init() {
   connect(ui->bSend, &QPushButton::clicked, this, [&]() {
-    auto value = ui->leMessage->text().toStdString();
-    if (!value.empty()) {
-      if (value[0] == '/') {
-        value.erase(value.begin());
-        client_->sendRaw(value);
-      } else {
-        client_->sendCurrentChannelMessage(value);
+    if (clientAlive_) {
+      auto value = ui->leMessage->text().toStdString();
+      if (!value.empty()) {
+        if (value[0] == '/') {
+          value.erase(value.begin());
+          client_->sendRaw(value);
+        } else {
+          client_->sendCurrentChannelMessage(value);
+        }
+        ui->leMessage->clear();
+        ui->leMessage->repaint();
       }
-      ui->leMessage->clear();
-      ui->leMessage->repaint();
     }
   });
 
   connect(ui->bLeave, &QPushButton::clicked, this, [&]() {
-    if (!client_->getChannel().empty()) {
-      client_->leaveChannel();
+    if (clientAlive_) {
+      if (!client_->getChannel().empty()) {
+        client_->leaveChannel();
+      }
     }
   });
 }
@@ -80,7 +92,7 @@ MainWindow::~MainWindow() {
 void MainWindow::appendMessage(QString msg) {
   QMetaObject::invokeMethod(this, [this, msg]() {
     if (!msg.isEmpty()) {
-      logList.append(msg);
+      logList.append(msg.trimmed());
       updateLog();
     }
   });
@@ -144,7 +156,9 @@ void MainWindow::onDisconnected() {
 }
 
 void MainWindow::onConnectionFailure(std::string reason) {
-  updateStatus(QString::fromStdString("Connection failure: " + reason));
+  auto msg = QString::fromStdString("Connection failure: " + reason);
+  updateStatus(msg);
+  appendMessage(msg);
 }
 
 void MainWindow::onCurrentChannelUsersUpdated(const std::vector<std::string>& users) {
@@ -165,6 +179,10 @@ void MainWindow::onServerChannelsUpdated(const std::vector<std::string>& channel
 
 void MainWindow::onErrorMessage(std::string message) {
   appendMessage(QString::fromStdString("Error: " + message));
+}
+
+void MainWindow::onUnknownMessage(std::string message) {
+  appendMessage(QString::fromStdString(message));
 }
 
 void MainWindow::enableControls() {
@@ -200,8 +218,14 @@ void MainWindow::setConnected(bool cn) {
 }
 
 void MainWindow::onDisconnectClicked() {
-  client_->shutdown();
-  disableControls();
+  if (clientAlive_) {
+    client_->shutdown();
+    disableControls();
+    usersList.clear();
+    channelsList.clear();
+    updateUsers();
+    updateChannels();
+  }
 }
 
 void MainWindow::onConnectClicked() {

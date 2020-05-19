@@ -26,6 +26,7 @@ class ClientView {
   virtual void onServerChannelsUpdated(const std::vector<std::string>& channels) = 0;
 
   virtual void onErrorMessage(std::string message) = 0;
+  virtual void onUnknownMessage(std::string message) = 0;
 
   virtual void enableControls() = 0;
   virtual void disableControls() = 0;
