@@ -23,7 +23,11 @@ Client::Client(const char *serverAddress,
                selfSource_ { nickName_, userName_, std::string(serverAddress_) },
                socket_ { nullptr },
                handler_ { nullptr },
-               view_{view} { setChannel(initialChannel); }
+               view_{view} {
+  if (!initialChannel.empty()) {
+    setChannel(initialChannel);
+  }
+}
 
 Client::~Client() {
   delete socket_;
@@ -60,11 +64,15 @@ bool Client::connect() {
     pthread_create(&readThread_, nullptr, &Client::readHandler, this);
   } else {
     perror("new Socket");
+    view_->onConnectionFailure("socker failed");
     return false;
   }
 
   sendCredentials();
-  setChannel(currentChannel_);
+  if (!currentChannel_.empty()) {
+    setChannel(currentChannel_);
+  }
+  view_->onConnected();
   return true;
 }
 
@@ -180,15 +188,20 @@ void *Client::readHandler(void *clientPtr) {
     }
   }
 
+  client->view_->onDisconnected();
+
   return client;
 }
 
 bool Client::onBaseMessage(const IrcMessage &msg) {
+  std::cerr << msg << std::endl;
   return MessageListener::onBaseMessage(msg);
 }
 
 bool Client::onPingMessage(const IrcMessage &message) {
+  view_->onPing();
   sendPong(message.getTrailing());
+  view_->onPong();
   return false;
 }
 
@@ -216,6 +229,11 @@ bool Client::onPrivMsgMessage(const IrcMessage &message) {
 }
 
 bool Client::onJoinMessage(const IrcMessage &message) {
+  if (message.getSource().nickName == selfSource_.nickName) {
+    currentChannel_ = message.getTrailing();
+    currentChannel_.erase(currentChannel_.begin());
+    currentChannel_.erase(currentChannel_.end() - 1);
+  }
   view_->onUserJoin(
       message.getSource().streamString() +
       " has joined channel " +
@@ -227,5 +245,10 @@ bool Client::onNamesReplyMessage(const IrcMessage &message) {
   auto names = IrcParser::splitString(message.getTrailing(), ' ');
   view_->onCurrentChannelUsersUpdated(names);
 
+  return true;
+}
+
+bool Client::onExpectedError(const IrcMessage &message) {
+  view_->onErrorMessage(message.getTrailing());
   return true;
 }

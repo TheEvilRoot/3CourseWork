@@ -65,6 +65,7 @@ private:
   bool onMOTDStart(const IrcMessage &) override;
   bool onMOTDContent(const IrcMessage &) override;
   bool onMOTDEnds(const IrcMessage &) override;
+  bool onExpectedError(const IrcMessage&) override;
 
   const char *serverAddress_;
   uint16_t port_;

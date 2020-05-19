@@ -23,6 +23,9 @@ class ClientView {
   virtual void onConnectionFailure(std::string reason) = 0;
 
   virtual void onCurrentChannelUsersUpdated(const std::vector<std::string> &users) = 0;
+  virtual void onServerChannelsUpdated(const std::vector<std::string>& channels) = 0;
+
+  virtual void onErrorMessage(std::string message) = 0;
 
 };
 

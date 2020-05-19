@@ -6,7 +6,8 @@ MainWindow::MainWindow(QWidget *parent):
   ClientView(),
   ui{new Ui::MainWindow},
   logModel{new QStringListModel},
-  usersModel{new QStringListModel} {
+  usersModel{new QStringListModel},
+  channelsModel{new QStringListModel} {
   ui->setupUi(this);
   init();
   createClient();
@@ -55,9 +56,7 @@ void MainWindow::appendMessage(QString msg) {
   QMetaObject::invokeMethod(this, [this, msg]() {
     if (!msg.isEmpty()) {
       logList.append(msg);
-      updateLogModel();
-      ui->listView->scrollToBottom();
-      ui->listView->repaint();
+      updateLog();
     }
   });
 }
@@ -75,9 +74,17 @@ void MainWindow::updateUsers() {
     ui->lwUsers->repaint();
   });
 }
-void MainWindow::updateLogModel() {
+
+void MainWindow::updateLog() {
   logModel->setStringList(logList);
-  ui->listView->setModel(logModel.get());
+  ui->lwLog->setModel(logModel.get());
+  ui->lwLog->scrollToBottom();
+  ui->lwLog->repaint();
+}
+
+void MainWindow::updateChannels() {
+  channelsModel->setStringList(channelsList);
+  ui->lwChannels->setModel(channelsModel.get());
 }
 
 void MainWindow::onMOTDUpdate(std::string motd) {
@@ -121,4 +128,16 @@ void MainWindow::onCurrentChannelUsersUpdated(const std::vector<std::string>& us
     usersList.append(QString::fromStdString(u));
   usersModel->setStringList(usersList);
   updateUsers();
+}
+
+void MainWindow::onServerChannelsUpdated(const std::vector<std::string>& channels) {
+  channelsList.clear();
+  for (const auto & c : channels)
+    channelsList.append(QString::fromStdString(c));
+  channelsModel->setStringList(channelsList);
+  updateChannels();
+}
+
+void MainWindow::onErrorMessage(std::string message) {
+  appendMessage(QString::fromStdString("Error: " + message));
 }

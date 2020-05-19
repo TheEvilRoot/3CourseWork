@@ -18,28 +18,59 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="leMessage"/>
-    </item>
-    <item row="1" column="0">
-     <widget class="QListView" name="lwUsers"/>
-    </item>
-    <item row="2" column="2">
+    <item row="5" column="5">
      <widget class="QPushButton" name="bSend">
       <property name="text">
        <string>Send</string>
       </property>
      </widget>
     </item>
-    <item row="0" column="0" colspan="3">
+    <item row="5" column="1">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Disconnect</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>Leave channel</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="2">
+     <widget class="QListView" name="lwUsers"/>
+    </item>
+    <item row="1" column="0" colspan="3">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Channels:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
      <widget class="QLabel" name="lStatus">
       <property name="text">
        <string>Status:</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QListView" name="listView"/>
+    <item row="2" column="0" colspan="2">
+     <widget class="QListView" name="lwChannels"/>
+    </item>
+    <item row="0" column="2" rowspan="5" colspan="4">
+     <widget class="QListView" name="lwLog"/>
+    </item>
+    <item row="5" column="2" colspan="3">
+     <widget class="QLineEdit" name="leMessage"/>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Users:</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

@@ -36,13 +36,16 @@ public:
   void onConnectionFailure(std::string reason) override;
 
   void onCurrentChannelUsersUpdated(const std::vector<std::string>& users) override;
+  void onServerChannelsUpdated(const std::vector<std::string>& channels) override;
 
-  void updateLogModel();
+  void onErrorMessage(std::string message) override;
 
  private:
   void appendMessage(QString qstr);
   void updateStatus(QString status);
+  void updateLog();
   void updateUsers();
+  void updateChannels();
 
   void createClient();
   void init();
@@ -51,9 +54,11 @@ public:
 
   std::unique_ptr<QStringListModel> logModel;
   std::unique_ptr<QStringListModel> usersModel;
+  std::unique_ptr<QStringListModel> channelsModel;
 
   QStringList logList;
   QStringList usersList;
+  QStringList channelsList;
 
   Client *client_;
   pthread_t clientThread_;
