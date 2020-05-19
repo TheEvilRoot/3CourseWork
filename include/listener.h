@@ -55,7 +55,7 @@ public:
   virtual bool onNamesReplyMessage(const IrcMessage &) { return true; }
 
 
-  bool shouldHandle(const std::string &messageType) const {
+  virtual bool shouldHandle(const std::string &messageType) const {
     return whitelist_.empty() || std::find(whitelist_.begin(), whitelist_.end(), messageType) != whitelist_.end();
   };
 

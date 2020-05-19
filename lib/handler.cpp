@@ -30,4 +30,3 @@ void IrcHandler::removeListener(MessageListener *listener) {
     listeners_.erase(pos);
   }
 }
-

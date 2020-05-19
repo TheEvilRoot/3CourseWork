@@ -57,11 +57,11 @@ class Client : public IrcClient, private MessageListener {
   void joinRead();
 
 private:
-  bool onBaseMessage(const IrcMessage &message) override;
-  bool onPingMessage(const IrcMessage &message) override;
+  bool onBaseMessage(const IrcMessage &msg) override;
   bool onPrivMsgMessage(const IrcMessage &message) override;
-  bool onJoinMessage(const IrcMessage &) override;
-  
+  bool onJoinMessage(const IrcMessage &message) override;
+  bool onNamesReplyMessage(const IrcMessage &message) override;
+  bool onPingMessage(const IrcMessage &message) override;
   bool onMOTDStart(const IrcMessage &) override;
   bool onMOTDContent(const IrcMessage &) override;
   bool onMOTDEnds(const IrcMessage &) override;

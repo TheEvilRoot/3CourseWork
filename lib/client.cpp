@@ -158,8 +158,9 @@ void Client::setHandler(IrcHandler *handler) {
 }
 
 void Client::removeHandler() {
-  if (handler_)
+  if (handler_) {
     handler_->removeListener(this);
+  }
   handler_ = nullptr;
 }
 
@@ -182,23 +183,13 @@ void *Client::readHandler(void *clientPtr) {
   return client;
 }
 
-bool Client::onBaseMessage(const IrcMessage &message) {
-  if (MessageListener::onBaseMessage(message))
-    return true;
-  return true;
+bool Client::onBaseMessage(const IrcMessage &msg) {
+  return MessageListener::onBaseMessage(msg);
 }
 
 bool Client::onPingMessage(const IrcMessage &message) {
   sendPong(message.getTrailing());
-  return true;
-}
-bool Client::onPrivMsgMessage(const IrcMessage &message) {
-  view_->newMessage(message.getSource().userName + " :: " + message.getTrailing());
-  return true;
-}
-
-bool Client::onJoinMessage(const IrcMessage &message) {
-  return true;
+  return false;
 }
 
 bool Client::onMOTDStart(const IrcMessage &message) {
@@ -212,6 +203,29 @@ bool Client::onMOTDContent(const IrcMessage &message) {
 }
 
 bool Client::onMOTDEnds(const IrcMessage &) {
-  view_->motdUpdate(motd_);
+  view_->onMOTDUpdate(motd_);
+  return true;
+}
+
+bool Client::onPrivMsgMessage(const IrcMessage &message) {
+  view_->onPrivateMessage(
+      message.getSource().streamString() +
+      " :: " +
+      message.getTrailing());
+  return true;
+}
+
+bool Client::onJoinMessage(const IrcMessage &message) {
+  view_->onUserJoin(
+      message.getSource().streamString() +
+      " has joined channel " +
+      message.getTrailing());
+  return true;
+}
+
+bool Client::onNamesReplyMessage(const IrcMessage &message) {
+  auto names = IrcParser::splitString(message.getTrailing(), ' ');
+  view_->onCurrentChannelUsersUpdated(names);
+
   return true;
 }
