@@ -46,6 +46,16 @@ void MainWindow::init() {
       ui->leMessage->repaint();
     }
   });
+
+  connect(ui->bLeave, &QPushButton::clicked, this, [&]() {
+    if (!client_->getChannel().empty()) {
+      client_->leaveChannel();
+    }
+  });
+
+  connect(ui->bDisconnect, &QPushButton::clicked, this, [&]() {
+    client_->shutdown();
+  });
 }
 
 MainWindow::~MainWindow() {
@@ -140,4 +150,22 @@ void MainWindow::onServerChannelsUpdated(const std::vector<std::string>& channel
 
 void MainWindow::onErrorMessage(std::string message) {
   appendMessage(QString::fromStdString("Error: " + message));
+}
+
+void MainWindow::enableControls() {
+  setControlsState(true);
+}
+
+void MainWindow::disableControls() {
+  setControlsState(false);
+}
+
+void MainWindow::setControlsState(bool state) {
+  QMetaObject::invokeMethod(this, [this, state] () {
+    ui->bDisconnect->setDisabled(!state);
+    ui->bLeave->setDisabled(!state);
+    ui->bSend->setDisabled(!state);
+    ui->lwUsers->setDisabled(!state);
+    ui->lwChannels->setDisabled(!state);
+  });
 }

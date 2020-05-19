@@ -40,12 +40,20 @@ public:
 
   void onErrorMessage(std::string message) override;
 
+  void enableControls() override;
+
+  void disableControls() override;
+
  private:
   void appendMessage(QString qstr);
   void updateStatus(QString status);
   void updateLog();
   void updateUsers();
   void updateChannels();
+
+  void setControlsState(bool);
+
+  void asyncUserAction(const std::function<void(ClientView *)> &function);
 
   void createClient();
   void init();

@@ -148,12 +148,22 @@ void Client::joinRead() {
 }
 
 void Client::sendCurrentChannelMessage(std::string message) {
-  sendChannelMessage(currentChannel_, std::move(message));
+  if (currentChannel_.empty()) {
+    view_->onErrorMessage("No channel selected");
+  } else {
+    sendChannelMessage(currentChannel_, std::move(message));
+  }
 }
 
 void Client::shutdown() {
   sendIrc("QUIT", { }, "Goodby!");
   joinRead();
+}
+
+void Client::leaveChannel() {
+  if (currentChannel_.empty() || !isConnected())
+    return;
+  sendIrc("PART", { "#" + currentChannel_ }, "");
 }
 
 IrcHandler *Client::getHandler() const {
@@ -250,5 +260,10 @@ bool Client::onNamesReplyMessage(const IrcMessage &message) {
 
 bool Client::onExpectedError(const IrcMessage &message) {
   view_->onErrorMessage(message.getTrailing());
+  return true;
+}
+
+bool Client::onExternalMessage(const IrcMessage &message) {
+  view_->onErrorMessage("You should be in channel to send messages");
   return true;
 }

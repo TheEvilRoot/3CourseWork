@@ -54,6 +54,13 @@ class Client : public IrcClient, private MessageListener {
 
   void sendCurrentChannelMessage(std::string message);
 
+  void leaveChannel();
+
+ private:
+  bool onExternalMessage(const IrcMessage &message) override;
+
+ public:
+
   void joinRead();
 
 private:

@@ -27,6 +27,9 @@ class ClientView {
 
   virtual void onErrorMessage(std::string message) = 0;
 
+  virtual void enableControls() = 0;
+  virtual void disableControls() = 0;
+
 };
 
 #endif //ANSIRC_INCLUDE_UI_CLIENTVIEW_H_

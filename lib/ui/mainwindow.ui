@@ -26,14 +26,14 @@
      </widget>
     </item>
     <item row="5" column="1">
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="bDisconnect">
       <property name="text">
        <string>Disconnect</string>
       </property>
      </widget>
     </item>
     <item row="5" column="0">
-     <widget class="QPushButton" name="pushButton_2">
+     <widget class="QPushButton" name="bLeave">
       <property name="text">
        <string>Leave channel</string>
       </property>
@@ -41,13 +41,6 @@
     </item>
     <item row="4" column="0" colspan="2">
      <widget class="QListView" name="lwUsers"/>
-    </item>
-    <item row="1" column="0" colspan="3">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Channels:</string>
-      </property>
-     </widget>
     </item>
     <item row="0" column="0" colspan="2">
      <widget class="QLabel" name="lStatus">
@@ -69,6 +62,13 @@
      <widget class="QLabel" name="label_2">
       <property name="text">
        <string>Users:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Channels:</string>
       </property>
      </widget>
     </item>

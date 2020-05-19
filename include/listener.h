@@ -40,6 +40,8 @@ public:
       return onNamesReplyMessage(msg);
     if (cmd == "403")
       return onExpectedError(msg);
+    if (cmd == "404")
+      return onExternalMessage(msg);
     
     return false;
   }
@@ -57,6 +59,7 @@ public:
   virtual bool onNamesReplyMessage(const IrcMessage &) { return true; }
 
   virtual bool onExpectedError(const IrcMessage &) { return true; }
+  virtual bool onExternalMessage(const IrcMessage&) { return true; }
 
   virtual bool shouldHandle(const std::string &messageType) const {
     return whitelist_.empty() || std::find(whitelist_.begin(), whitelist_.end(), messageType) != whitelist_.end();
