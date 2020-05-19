@@ -9,6 +9,7 @@
 #include <QMessageBox>
 
 #include "ui/clientview.h"
+#include "ui/login.h"
 
 #include "client.h"
 #include "pthread.h"
@@ -45,6 +46,7 @@ public:
 
   void disableControls() override;
 
+  void createClient(std::string address, uint16_t port, std::string username, std::string realname, std::string nickname) override;
  private:
   void appendMessage(QString qstr);
   void updateStatus(QString status);
@@ -57,8 +59,6 @@ public:
 
   void onConnectClicked();
   void onDisconnectClicked();
-
-  void createClient(const char *address, uint16_t port, const std::string &username, const std::string &realname, const std::string &nickname);
   void init();
 
   Ui::MainWindow *ui;
@@ -76,6 +76,8 @@ public:
   bool clientAlive_;
 
   QString motd_;
+
+  std::unique_ptr<LoginForm> form_;
 };
 
 #endif //ANSIRC_INCLUDE_UI_MAINWINDOW_H_

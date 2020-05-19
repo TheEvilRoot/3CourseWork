@@ -30,6 +30,8 @@ class ClientView {
   virtual void enableControls() = 0;
   virtual void disableControls() = 0;
 
+  virtual void createClient(std::string address, uint16_t port, std::string username, std::string realname, std::string nickname) = 0;
+
 };
 
 #endif //ANSIRC_INCLUDE_UI_CLIENTVIEW_H_

@@ -7,15 +7,17 @@ MainWindow::MainWindow(QWidget *parent):
   ui{new Ui::MainWindow},
   logModel{new QStringListModel},
   usersModel{new QStringListModel},
-  channelsModel{new QStringListModel} {
+  channelsModel{new QStringListModel},
+  client_{nullptr}{
   ui->setupUi(this);
   init();
   updateStatus("Idle");
   setConnected(false);
 }
 
-void MainWindow::createClient(const char *address, uint16_t port, const std::string &username, const std::string &realname, const std::string &nickname) {
-  if (client_ != nullptr && client_->isConnected() || clientAlive_) {
+void MainWindow::createClient(std::string address, uint16_t port, std::string username, std::string realname, std::string nickname) {
+  form_.reset();
+  if (clientAlive_) {
     QMessageBox::critical(this, "Create client", "Unable to create new client while previous is working.\nWait for 'Idle' status and try again");
     return;
   }
@@ -203,5 +205,10 @@ void MainWindow::onDisconnectClicked() {
 }
 
 void MainWindow::onConnectClicked() {
-  createClient("127.0.0.1", 6667, "S1ave", "S1ave", "S1ave");
+  if (!form_) {
+    form_ = std::make_unique<LoginForm>(this, this);
+    form_->show();
+  } else {
+    form_->setFocus();
+  }
 }

@@ -7,7 +7,7 @@
 #include <utility>
 #include <sstream>
 
-Client::Client(const char *serverAddress,
+Client::Client(std::string serverAddress,
                uint16_t port,
                std::string userName,
                std::string realName,
@@ -59,7 +59,7 @@ bool Client::connect() {
     return true;
   }
 
-  socket_ = new Socket(serverAddress_, port_);
+  socket_ = new Socket(serverAddress_.c_str(), port_);
   if (socket_->getSockDesc() >= 0 && socket_->getConnectionStatus() == 0) {
     pthread_create(&readThread_, nullptr, &Client::readHandler, this);
   } else {

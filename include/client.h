@@ -11,7 +11,7 @@
 
 class Client : public IrcClient, private MessageListener {
  public:
-  Client(const char *serverAddress,
+  Client(std::string serverAddress,
       uint16_t port,
       std::string userName,
       std::string realName,
@@ -74,7 +74,7 @@ private:
   bool onMOTDEnds(const IrcMessage &) override;
   bool onExpectedError(const IrcMessage&) override;
 
-  const char *serverAddress_;
+  std::string serverAddress_;
   uint16_t port_;
   std::string userName_;
   std::string realName_;
