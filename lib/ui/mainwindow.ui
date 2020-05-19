@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>551</width>
-    <height>355</height>
+    <width>484</width>
+    <height>275</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,41 +31,15 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QScrollArea" name="saLog">
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>259</width>
-         <height>270</height>
-        </rect>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <widget class="QLabel" name="lLog">
-          <property name="text">
-           <string>TextLabel</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
     <item row="0" column="0" colspan="3">
      <widget class="QLabel" name="lStatus">
       <property name="text">
        <string>Status:</string>
       </property>
      </widget>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <widget class="QListView" name="listView"/>
     </item>
    </layout>
   </widget>

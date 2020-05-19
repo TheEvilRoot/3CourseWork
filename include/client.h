@@ -7,9 +7,17 @@
 #include "irc.h"
 #include "handler.h"
 
+#include "ui/clientview.h"
+
 class Client : public IrcClient, private MessageListener {
  public:
-  Client(const char *serverAddress, uint16_t port, std::string userName, std::string realName, std::string nickName, const std::string& initialChannel);
+  Client(const char *serverAddress,
+      uint16_t port,
+      std::string userName,
+      std::string realName,
+      std::string nickName,
+      const std::string& initialChannel,
+      ClientView *view);
   ~Client() override;
 
   void setChannel(const std::string& channel);
@@ -24,7 +32,7 @@ class Client : public IrcClient, private MessageListener {
 
   void shutdown();
 
-  void sendRaw(std::string rawIrc);
+  void sendRaw(const std::string& rawIrc);
 
   void sendIrc(std::string command, std::vector<std::string> args, std::string comment)override;
 
@@ -70,6 +78,8 @@ private:
   Socket *socket_;
   pthread_t readThread_;
   IrcHandler *handler_;
+
+  ClientView *view_;
 
   static void *readHandler(void *clientPtr);
 

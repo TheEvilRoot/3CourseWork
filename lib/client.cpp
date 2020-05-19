@@ -5,7 +5,6 @@
 #include "client.h"
 
 #include <utility>
-#include <iostream>
 #include <sstream>
 
 Client::Client(const char *serverAddress,
@@ -13,7 +12,8 @@ Client::Client(const char *serverAddress,
                std::string userName,
                std::string realName,
                std::string nickName,
-               const std::string& initialChannel):
+               const std::string& initialChannel,
+               ClientView *view):
                MessageListener({ }),
                serverAddress_ { serverAddress },
                port_ { port },
@@ -22,7 +22,8 @@ Client::Client(const char *serverAddress,
                nickName_ {std::move( nickName )},
                selfSource_ { nickName_, userName_, std::string(serverAddress_) },
                socket_ { nullptr },
-               handler_ { nullptr } { setChannel(initialChannel); }
+               handler_ { nullptr },
+               view_{view} { setChannel(initialChannel); }
 
 Client::~Client() {
   delete socket_;
@@ -64,7 +65,6 @@ bool Client::connect() {
 
   sendCredentials();
   setChannel(currentChannel_);
-
   return true;
 }
 
@@ -72,7 +72,7 @@ Socket *Client::getSocket() const {
   return socket_;
 }
 
-void Client::sendRaw(std::string rawIrc) {
+void Client::sendRaw(const std::string& rawIrc) {
   if (isConnected()) {
     socket_->send(rawIrc);
   }
@@ -179,14 +179,12 @@ void *Client::readHandler(void *clientPtr) {
     }
   }
 
-  std::cout << "%%%\n";
   return client;
 }
 
 bool Client::onBaseMessage(const IrcMessage &message) {
   if (MessageListener::onBaseMessage(message))
     return true;
-  std::cout << "(" << message.getCommand() << ") " << message.getTrailing();
   return true;
 }
 
@@ -195,12 +193,11 @@ bool Client::onPingMessage(const IrcMessage &message) {
   return true;
 }
 bool Client::onPrivMsgMessage(const IrcMessage &message) {
-  std::cout << ">> " << message.getSource() << ": " << message.getTrailing();
+  view_->newMessage(message.getSource().userName + " :: " + message.getTrailing());
   return true;
 }
 
 bool Client::onJoinMessage(const IrcMessage &message) {
-  std::cout << message.getSource() << " has joined channel " << message.getTrailing();
   return true;
 }
 
@@ -215,8 +212,6 @@ bool Client::onMOTDContent(const IrcMessage &message) {
 }
 
 bool Client::onMOTDEnds(const IrcMessage &) {
-  std::cout << "- Message of the Day\n";
-  std::cout << motd_;
-  std::cout << "- End of the Message of the Day\n";
+  view_->motdUpdate(motd_);
   return true;
 }

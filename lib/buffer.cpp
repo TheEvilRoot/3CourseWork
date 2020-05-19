@@ -2,8 +2,10 @@
 
 void Buffer::push(const std::string &newData) {
   for (auto c : newData) {
-    data_ += c;
-    if ((c == '\n' && !data_.empty()) || data_.length() >= 512) {
+    if (c != '\r') {
+      data_ += c;
+    }
+    if (((c == '\n') && !data_.empty()) || data_.length() >= 512) {
       next();
     }
   }

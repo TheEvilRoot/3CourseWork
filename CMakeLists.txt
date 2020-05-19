@@ -44,7 +44,7 @@ set(LIB_FILES
         lib/ui/mainwindow.cpp)
 
 set(SOURCE_FILES
-        src/main.cpp)
+        src/main.cpp include/ui/clientview.h)
 
 add_executable(${PROJECT_NAME}
         ${SOURCE_FILES}
