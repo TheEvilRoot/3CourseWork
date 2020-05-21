@@ -6,6 +6,7 @@
 #include <vector>
 #include <utility>
 #include <ostream>
+#include <sstream>
 
 struct MessageSource {
   std::string nickName;
@@ -15,7 +16,13 @@ struct MessageSource {
   std::string getString() const {
     return nickName + "!~" + userName + "@" + hostName;
   }
-  
+
+  std::string streamString() const {
+    std::ostringstream str;
+    str << *this;
+    return str.str();
+  }
+
   friend std::ostream& operator<<(std::ostream& out, const MessageSource &source) {
     if (!source.nickName.empty()){
       out << source.nickName;

@@ -5,15 +5,15 @@
 #include "client.h"
 
 #include <utility>
-#include <iostream>
 #include <sstream>
 
-Client::Client(const char *serverAddress,
+Client::Client(std::string serverAddress,
                uint16_t port,
                std::string userName,
                std::string realName,
                std::string nickName,
-               const std::string& initialChannel):
+               const std::string& initialChannel,
+               ClientView *view):
                MessageListener({ }),
                serverAddress_ { serverAddress },
                port_ { port },
@@ -22,7 +22,12 @@ Client::Client(const char *serverAddress,
                nickName_ {std::move( nickName )},
                selfSource_ { nickName_, userName_, std::string(serverAddress_) },
                socket_ { nullptr },
-               handler_ { nullptr } { setChannel(initialChannel); }
+               handler_ { nullptr },
+               view_{view} {
+  if (!initialChannel.empty()) {
+    setChannel(initialChannel);
+  }
+}
 
 Client::~Client() {
   delete socket_;
@@ -54,17 +59,20 @@ bool Client::connect() {
     return true;
   }
 
-  socket_ = new Socket(serverAddress_, port_);
+  socket_ = new Socket(serverAddress_.c_str(), port_);
   if (socket_->getSockDesc() >= 0 && socket_->getConnectionStatus() == 0) {
     pthread_create(&readThread_, nullptr, &Client::readHandler, this);
   } else {
     perror("new Socket");
+    view_->onConnectionFailure("Socket connection failed");
     return false;
   }
 
   sendCredentials();
-  setChannel(currentChannel_);
-
+  if (!currentChannel_.empty()) {
+    setChannel(currentChannel_);
+  }
+  view_->onConnected();
   return true;
 }
 
@@ -72,7 +80,7 @@ Socket *Client::getSocket() const {
   return socket_;
 }
 
-void Client::sendRaw(std::string rawIrc) {
+void Client::sendRaw(const std::string& rawIrc) {
   if (isConnected()) {
     socket_->send(rawIrc);
   }
@@ -140,12 +148,22 @@ void Client::joinRead() {
 }
 
 void Client::sendCurrentChannelMessage(std::string message) {
-  sendChannelMessage(currentChannel_, std::move(message));
+  if (currentChannel_.empty()) {
+    view_->onErrorMessage("No channel selected");
+  } else {
+    sendChannelMessage(currentChannel_, std::move(message));
+  }
 }
 
 void Client::shutdown() {
   sendIrc("QUIT", { }, "Goodby!");
   joinRead();
+}
+
+void Client::leaveChannel() {
+  if (currentChannel_.empty() || !isConnected())
+    return;
+  sendIrc("PART", { "#" + currentChannel_ }, "");
 }
 
 IrcHandler *Client::getHandler() const {
@@ -158,8 +176,9 @@ void Client::setHandler(IrcHandler *handler) {
 }
 
 void Client::removeHandler() {
-  if (handler_)
+  if (handler_) {
     handler_->removeListener(this);
+  }
   handler_ = nullptr;
 }
 
@@ -179,29 +198,25 @@ void *Client::readHandler(void *clientPtr) {
     }
   }
 
-  std::cout << "%%%\n";
+  client->view_->onDisconnected();
+
   return client;
 }
 
-bool Client::onBaseMessage(const IrcMessage &message) {
-  if (MessageListener::onBaseMessage(message))
+bool Client::onBaseMessage(const IrcMessage &msg) {
+  std::cerr << msg << std::endl;
+  if (!MessageListener::onBaseMessage(msg)) {
+    view_->onUnknownMessage(msg.getRaw());
     return true;
-  std::cout << "(" << message.getCommand() << ") " << message.getTrailing();
+  }
   return true;
 }
 
 bool Client::onPingMessage(const IrcMessage &message) {
+  view_->onPing();
   sendPong(message.getTrailing());
-  return true;
-}
-bool Client::onPrivMsgMessage(const IrcMessage &message) {
-  std::cout << ">> " << message.getSource() << ": " << message.getTrailing();
-  return true;
-}
-
-bool Client::onJoinMessage(const IrcMessage &message) {
-  std::cout << message.getSource() << " has joined channel " << message.getTrailing();
-  return true;
+  view_->onPong();
+  return false;
 }
 
 bool Client::onMOTDStart(const IrcMessage &message) {
@@ -215,8 +230,44 @@ bool Client::onMOTDContent(const IrcMessage &message) {
 }
 
 bool Client::onMOTDEnds(const IrcMessage &) {
-  std::cout << "- Message of the Day\n";
-  std::cout << motd_;
-  std::cout << "- End of the Message of the Day\n";
+  view_->onMOTDUpdate(motd_);
+  return true;
+}
+
+bool Client::onPrivMsgMessage(const IrcMessage &message) {
+  view_->onPrivateMessage(
+      message.getSource().streamString() +
+      " :: " +
+      message.getTrailing());
+  return true;
+}
+
+bool Client::onJoinMessage(const IrcMessage &message) {
+  if (message.getSource().nickName == selfSource_.nickName) {
+    currentChannel_ = message.getTrailing();
+    currentChannel_.erase(currentChannel_.begin());
+    currentChannel_.erase(currentChannel_.end() - 1);
+  }
+  view_->onUserJoin(
+      message.getSource().streamString() +
+      " has joined channel " +
+      message.getTrailing());
+  return true;
+}
+
+bool Client::onNamesReplyMessage(const IrcMessage &message) {
+  auto names = IrcParser::splitString(message.getTrailing(), ' ');
+  view_->onCurrentChannelUsersUpdated(names);
+
+  return true;
+}
+
+bool Client::onExpectedError(const IrcMessage &message) {
+  view_->onErrorMessage(message.getTrailing());
+  return true;
+}
+
+bool Client::onExternalMessage(const IrcMessage &message) {
+  view_->onErrorMessage("You should be in channel to send messages");
   return true;
 }

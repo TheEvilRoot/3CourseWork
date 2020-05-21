@@ -38,7 +38,13 @@ public:
       return onMOTDEnds(msg);
     if (cmd == "353")
       return onNamesReplyMessage(msg);
-    
+    if (cmd == "403")
+      return onExpectedError(msg);
+    if (cmd == "404")
+      return onExternalMessage(msg);
+    if (cmd == "366")
+      return true;
+
     return false;
   }
 
@@ -54,8 +60,10 @@ public:
   virtual bool onJoinMessage(const IrcMessage &) { return true; }
   virtual bool onNamesReplyMessage(const IrcMessage &) { return true; }
 
+  virtual bool onExpectedError(const IrcMessage &) { return true; }
+  virtual bool onExternalMessage(const IrcMessage&) { return true; }
 
-  bool shouldHandle(const std::string &messageType) const {
+  virtual bool shouldHandle(const std::string &messageType) const {
     return whitelist_.empty() || std::find(whitelist_.begin(), whitelist_.end(), messageType) != whitelist_.end();
   };
 
